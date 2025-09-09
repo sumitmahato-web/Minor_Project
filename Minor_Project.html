@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <link rel="stylesheet" href="minor.css">
+    <style>
+      body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A softer, more modern font */
+    background-color: #eef2f6; /* Light, calming blue-grey background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Use min-height for better content handling */
+    margin: 0;
+    color: #4a4a4a; /* Softer text color */
+    line-height: 1.6;
+}
+
+.calculator-container {
+    background-color: #ffffff; /* Clean white for the main card */
+    padding: 40px; /* More padding for breathing room */
+    border-radius: 15px; /* Softer, more rounded corners */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); /* A gentle, diffused shadow */
+    text-align: center;
+    width: 90%;
+    max-width: 450px; /* Slightly wider for better balance */
+    border: 1px solid #e0e6ed; /* Subtle border for definition */
+}
+
+h1 {
+    color: #3f51b5; /* A soothing blue for the heading */
+    margin-bottom: 30px;
+    font-size: 2.2em; /* Slightly larger heading */
+    font-weight: 600; /* Medium bold */
+}
+
+.input-group {
+    margin-bottom: 25px; /* More space between input groups */
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 10px; /* Space between label and input */
+    color: #607d8b; /* Muted grey for labels */
+    font-weight: 500; /* Slightly lighter label font */
+    font-size: 0.95em;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 15px; /* More padding inside inputs */
+    border: 1px solid #dcdcdc; /* Lighter border color */
+    border-radius: 8px; /* Softer input field corners */
+    box-sizing: border-box;
+    font-size: 1.05em; /* Slightly larger text in inputs */
+    color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for focus */
+}
+
+.input-group input:focus {
+    border-color: #8bb4e1; /* A gentle blue on focus */
+    box-shadow: 0 0 0 3px rgba(96, 125, 139, 0.1); /* Subtle glow on focus */
+    outline: none; /* Remove default outline */
+}
+
+button {
+    width: 100%;
+    padding: 15px; /* More padding for a more substantial button */
+    background-color: #673ab7; /* A calming lavender/indigo for the button */
+    color: white;
+    border: none;
+    border-radius: 8px; /* Soft button corners */
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    letter-spacing: 0.5px; /* Slightly spaced letters */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    box-shadow: 0 4px 15px rgba(103, 58, 183, 0.2); /* Soft shadow for depth */
+}
+
+button:hover {
+    background-color: #512da8; /* Slightly darker on hover */
+    transform: translateY(-2px); /* Gentle lift effect */
+    box-shadow: 0 6px 20px rgba(103, 58, 183, 0.3); /* Enhanced shadow on hover */
+}
+
+button:active {
+    transform: translateY(0); /* Press down effect */
+    box-shadow: 0 2px 10px rgba(103, 58, 183, 0.2);
+}
+
+#result-message {
+    margin-top: 30px; /* More space above the result */
+    font-size: 1.4em; /* Larger result text */
+    font-weight: 700; /* Bolder result */
+    color: #3f51b5; /* Consistent calming blue for the result */
+    min-height: 35px; /* Ensure space even when empty */
+    transition: color 0.3s ease, transform 0.3s ease; /* Smooth transition for result changes */
+}
+
+/* Optional: Add a small animation for the result message when it appears */
+#result-message.show {
+    animation: fadeInScale 0.5s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Enhancements for different BMI statuses (optional, but adds visual soothing feedback) */
+#result-message[data-status="underweight"] { color: #ff9800; } /* Orange for underweight */
+#result-message[data-status="normal"] { color: #4caf50; }     /* Green for normal */
+#result-message[data-status="overweight"] { color: #f44336; }  /* Red for overweight */
+#result-message[data-status="obese"] { color: #d32f2f; }       /* Darker red for obese */
+
+
+    </style>
+    
+</head>
+<body>
+
+    <div class="calculator-container">
+        <h1>BMI Calculator 🏋️</h1>
+        
+        <div class="input-group">
+            <label for="mass">Mass (in kg)</label>
+            <input type="number" id="mass" placeholder="Enter your mass in kilograms">
+        </div>
+        
+        <div class="input-group">
+            <label for="height">Height (in cm)</label>
+            <input type="number" id="height" placeholder="Enter your height in centimeters">
+        </div>
+        
+        <button id="calculateBtn">Calculate BMI</button>
+        
+        <p id="result-message"></p>
+    </div>
+
+    <script>
+      // Get references to the HTML elements
+const massInput = document.getElementById('mass');
+const heightInput = document.getElementById('height');
+const calculateBtn = document.getElementById('calculateBtn');
+const resultMessage = document.getElementById('result-message');
+
+// Add a click event listener to the button
+calculateBtn.addEventListener('click', () => {
+    // Get values from input fields and convert them to integers
+    const mass = parseInt(massInput.value);
+    const height = parseInt(heightInput.value);
+
+    // Clear previous status and result message
+    resultMessage.textContent = "";
+    resultMessage.removeAttribute('data-status');
+    resultMessage.classList.remove('show'); // Remove animation class
+
+    // Validate the inputs
+    if (isNaN(mass) || isNaN(height) || mass <= 0 || height <= 0) {
+        // Show an alert if values are zero, negative, or empty
+        alert("Values must be positive.");
+        
+        // Clear the input fields
+        massInput.value = "";
+        heightInput.value = "";
+        return; // Stop the function here
+    }
+
+    // Convert height from cm to meters for the BMI formula
+    const heightInMeters = height / 100;
+    
+    // Calculate BMI using the standard formula: mass (kg) / [height (m)]^2
+    const bmi = mass / (heightInMeters * heightInMeters);
+
+    // Determine the result message and status
+    let message = "";
+    let status = ""; 
+
+    if (bmi < 18.5) {
+        message = "You are underweight.";
+        status = "underweight";
+    } else if (bmi >= 18.5 && bmi < 25) {
+        message = "You are normal.";
+        status = "normal";
+    } else if (bmi >= 25 && bmi < 30) {
+        message = "You are overweight.";
+        status = "overweight";
+    } else { // BMI is 30 or above
+        message = "You are obese.";
+        status = "obese";
+    }
+
+    // Display the final message and trigger the animation
+    resultMessage.textContent = message;
+    resultMessage.setAttribute('data-status', status); 
+    resultMessage.classList.add('show');
+});
+
+    </script>
+
+
+</body>
+</html>
